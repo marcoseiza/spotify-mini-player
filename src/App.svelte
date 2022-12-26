@@ -6,6 +6,7 @@
     SkipForward,
     HeartStraight,
     Shuffle,
+    Pause,
   } from "phosphor-svelte";
   import { playback } from "./lib/state/playback";
   import { user } from "./lib/state/user";
@@ -18,6 +19,10 @@
     await playback.init();
     await user.login();
   };
+
+  $: progress = `${
+    ($playback?.progress_ms / $playback?.item.duration_ms) * 100 || 0
+  }%`;
 </script>
 
 <main class="container">
@@ -47,19 +52,26 @@
       </h3>
     </div>
     <div class="progress-bar">
-      <div class="completed">
+      <div class="completed" style={`--progress:${progress}`}>
         <div class="knob" />
       </div>
     </div>
     <div class="controls">
       <div class="music-controls">
         <SkipBack size={20} weight="fill" />
-        <Play size={20} weight="fill" />
+        {#if $playback?.actions.disallows.includes("resuming")}
+          <Pause size={20} weight="fill" />
+        {:else}
+          <Play size={20} weight="fill" />
+        {/if}
         <SkipForward size={20} weight="fill" />
       </div>
       <div class="play-controls">
         <div class="thicc-button">
-          <HeartStraight size={20} weight="regular" />
+          <HeartStraight
+            size={20}
+            weight={$playback.liked ? "fill" : "regular"}
+          />
         </div>
         <div class="thicc-button">
           <Shuffle size={20} weight="regular" />
@@ -162,8 +174,8 @@
 
   .completed {
     position: relative;
+    width: var(--progress);
     background-color: white;
-    width: 30%;
     border-radius: 1em;
   }
 

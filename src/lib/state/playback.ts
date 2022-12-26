@@ -4,6 +4,10 @@ import { writable, type Readable, type Subscriber } from "svelte/store";
 type AsyncReadable<T> = Readable<T> & { init: () => Promise<void> };
 
 interface Playback {
+  liked: boolean;
+  actions: {
+    disallows: ("resuming" | "pausing")[];
+  };
   item: {
     name: string;
     duration_ms: number;

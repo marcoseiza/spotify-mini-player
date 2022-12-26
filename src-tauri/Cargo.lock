@@ -2985,6 +2985,7 @@ dependencies = [
 name = "spotify-mini-player"
 version = "0.0.0"
 dependencies = [
+ "chrono",
  "cocoa",
  "env_logger",
  "objc",
@@ -2995,6 +2996,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-positioner",
+ "tauri-plugin-store",
  "webbrowser",
  "window-vibrancy",
 ]
@@ -3304,6 +3306,17 @@ dependencies = [
  "serde_json",
  "serde_repr",
  "tauri",
+]
+
+[[package]]
+name = "tauri-plugin-store"
+version = "0.0.0"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "thiserror",
 ]
 
 [[package]]
