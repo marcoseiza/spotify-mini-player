@@ -1,3 +1,0 @@
-[submodule "tauri-plugin-store"]
-	path = tauri-plugin-store
-	url = https://github.com/tauri-apps/tauri-plugin-store.git
