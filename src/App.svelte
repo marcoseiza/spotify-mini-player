@@ -7,37 +7,66 @@
     HeartStraight,
     Shuffle,
   } from "phosphor-svelte";
+  import { playback } from "./lib/state/playback";
+  import { user } from "./lib/state/user";
+
+  $: imageSrc = $playback?.item.album.images.at(1)?.url;
+
+  $: numberOfArtists = $playback?.item.artists.length;
+
+  $: setup = async () => {
+    await playback.init();
+    await user.login();
+  };
 </script>
 
 <main class="container">
-  <div class="logo">
-    <Spotify />
-  </div>
-  <div class="cover-art" />
-  <div class="info">
-    <h1>Title</h1>
-    <h3>Singer and stuff</h3>
-  </div>
-  <div class="progress-bar">
-    <div class="completed">
-      <div class="knob" />
+  {#await setup()}
+    <div>Fetching...</div>
+  {:then}
+    <div class="logo">
+      <Spotify />
     </div>
-  </div>
-  <div class="controls">
-    <div class="music-controls">
-      <SkipBack size={20} weight="fill" />
-      <Play size={20} weight="fill" />
-      <SkipForward size={20} weight="fill" />
+    <div class="cover-art">
+      <img src={imageSrc} alt="" />
     </div>
-    <div class="play-controls">
-      <div class="thicc-button">
-        <HeartStraight size={20} weight="regular" />
+    <div class="info">
+      <h1>{$playback?.item.name}</h1>
+      <h3>
+        {#each $playback?.item.artists || [] as artist, index}
+          <a
+            href={artist.external_urls.spotify}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>
+              {artist.name}{index < numberOfArtists - 1 ? "," : ""}
+            </span>
+          </a>
+        {/each}
+      </h3>
+    </div>
+    <div class="progress-bar">
+      <div class="completed">
+        <div class="knob" />
       </div>
-      <div class="thicc-button">
-        <Shuffle size={20} weight="regular" />
+    </div>
+    <div class="controls">
+      <div class="music-controls">
+        <SkipBack size={20} weight="fill" />
+        <Play size={20} weight="fill" />
+        <SkipForward size={20} weight="fill" />
+      </div>
+      <div class="play-controls">
+        <div class="thicc-button">
+          <HeartStraight size={20} weight="regular" />
+        </div>
+        <div class="thicc-button">
+          <Shuffle size={20} weight="regular" />
+        </div>
       </div>
     </div>
-  </div>
+  {/await}
 </main>
 
 <style>
@@ -61,14 +90,27 @@
   .cover-art {
     width: 100%;
     aspect-ratio: 1/1;
-    background-color: blue;
+    background-color: rgba(120, 120, 120, 0.2);
     border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .cover-art img {
+    width: 100%;
   }
 
   .info {
     margin-top: 0.5em;
     display: flex;
     flex-direction: column;
+  }
+
+  .info h1,
+  .info h3 {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .controls {
@@ -109,6 +151,7 @@
   }
 
   .progress-bar {
+    flex-shrink: 0;
     width: 100%;
     height: 2px;
     background-color: rgba(150, 150, 150);

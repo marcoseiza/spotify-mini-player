@@ -17,7 +17,7 @@
 
   color: #f6f6f6;
   border: solid 1px white;
-  border-color: rgb(73, 73, 73);
+  border-color: rgb(140, 140, 140);
   border-radius: 9px;
   overflow: hidden;
 }
@@ -53,19 +53,19 @@ body {
 
 h1 {
   font-size: 13.5px;
-  line-height: 0.9em;
+  line-height: 1.1em;
   margin: 0.2em 0;
 }
 
 h2 {
   font-size: 13.5px;
-  line-height: 0.9em;
+  line-height: 1.1em;
   margin: 0.2em 0;
 }
 
 h3 {
   font-size: 12px;
-  line-height: 0.9em;
+  line-height: 1.1em;
   font-weight: 500;
   margin: 0.2em 0;
 }
@@ -84,4 +84,9 @@ p {
   h3 {
     color: rgb(114, 114, 114);
   }
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
 }
