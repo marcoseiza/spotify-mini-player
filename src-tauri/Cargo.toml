@@ -27,6 +27,10 @@ env_logger = "0.10.0"
 webbrowser = "0.8.2"
 tauri-plugin-store = { path = "../tauri-plugin-store" }
 chrono = "0.4.23"
+thiserror = "1.0.38"
+anyhow = "1.0.68"
+tokio = "1.23.0"
+async-trait = "0.1.60"
 
 [features]
 # by default Tauri runs in production mode

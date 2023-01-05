@@ -16,10 +16,13 @@
   height: 100%;
 
   color: #f6f6f6;
-  border: solid 1px white;
-  border-color: rgb(140, 140, 140);
+  border-style: solid;
+  border-width: 1px;
+  border-color: rgba(157, 157, 157, 0.5);
   border-radius: 9px;
   overflow: hidden;
+
+  --spotify-green: #1db954;
 }
 
 @media (prefers-color-scheme: light) {
@@ -89,4 +92,33 @@ p {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  display: blocks;
+  background-color: transparent;
+  text-decoration: none;
+  border: none;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+.skeleton-inline {
+  position: relative;
+  display: inline-block;
+  height: max-content;
+  width: max-content;
+}
+
+.skeleton-inline::after {
+  position: relative;
+  content: attr(data-placeholder);
+  border-radius: 4px;
+  background-color: rgb(179, 179, 179, 0.5);
+  color: transparent;
 }

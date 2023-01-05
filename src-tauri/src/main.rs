@@ -5,13 +5,12 @@
 
 use std::sync::Arc;
 
-use chrono::naive::serde::ts_milliseconds::deserialize;
-use chrono::{DateTime, Duration, Utc};
 use cocoa::appkit::{NSWindow, NSWindowStyleMask, NSWindowTitleVisibility};
 use cocoa::base::id;
-use rspotify::prelude::BaseClient;
-use rspotify::{scopes, AuthCodeSpotify, Credentials, OAuth, Token};
-use serde_json::Value;
+use reauth::reauth_spotify;
+
+use rspotify::{AuthCodeSpotify, Credentials, OAuth};
+use scopes::get_scopes;
 use tauri_plugin_store::{with_store, PluginBuilder, StoreBuilder, StoreCollection};
 
 use std::sync::Mutex as SyncMutex;
@@ -25,7 +24,9 @@ use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial, NSVisualEffectStat
 
 mod handlers;
 mod helpers;
+mod reauth;
 mod redirect_uri;
+mod scopes;
 mod state;
 
 use handlers::*;
@@ -38,7 +39,7 @@ fn create_tray_window(app_handle: &AppHandle) -> tauri::Result<Window> {
         tauri::WindowUrl::App("index.html".into()),
     )
     .fullscreen(false)
-    .inner_size(200., 320.)
+    .inner_size(200., 340.)
     .resizable(false)
     .title("spotify mini player")
     .transparent(true)
@@ -77,16 +78,23 @@ fn handle_on_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
     tauri_plugin_positioner::on_tray_event(app, &event);
     if let SystemTrayEvent::LeftClick { .. } = event {
         match app.get_window("main") {
-            Some(window) => match window.is_visible() {
-                Ok(true) => {
+            Some(window) => {
+                if let Ok(true) = window.is_visible() {
                     window.close().unwrap();
                     unsubscribe_to_event_loop(app).unwrap();
                 }
-                _ => todo!(),
-            },
+            }
             None => {
                 create_tray_window(app).unwrap();
                 subscribe_to_event_loop(app).unwrap();
+                let mutex_app = Box::new(Mutex::new(app.clone()));
+                tauri::async_runtime::spawn(async move {
+                    let app = mutex_app.lock().await;
+                    reauth_spotify(&app).await.expect("Reauth Error");
+                    let app_state = app.state::<AppStore>().0.clone();
+                    let mut app_state = app_state.lock().await;
+                    app_state.get_current_playback().await
+                });
             }
         }
     }
@@ -102,21 +110,14 @@ fn handle_on_window_event(event: GlobalWindowEvent) {
             window.close().unwrap();
             unsubscribe_to_event_loop(&app_handle).unwrap();
         }
-    };
+    }
 }
 
 fn main() {
     env_logger::init();
 
     let creds = Credentials::from_env().unwrap();
-    // Using every possible scope
-    let scopes = scopes!(
-        "user-read-currently-playing",
-        "user-read-playback-state",
-        "user-read-playback-position",
-        "user-modify-playback-state",
-        "user-library-read"
-    );
+    let scopes = get_scopes();
     let oauth = OAuth::from_env(scopes).unwrap();
 
     let spotify = AuthCodeSpotify::new(creds, oauth);
@@ -131,42 +132,21 @@ fn main() {
         .on_window_event(handle_on_window_event)
         .setup(|app| {
             app.set_activation_policy(ActivationPolicy::Accessory);
-
-            let collection = app.state::<StoreCollection>();
-            let spotify_client = app.state::<SpotifyClient>().0.clone();
-
-            {
-                let token = with_store(
-                    &app.handle(),
-                    collection,
-                    STORE_PATH_BUF.parse().unwrap(),
-                    |store| Ok(store.cache.get(&STORE_TOKEN_KEY.to_string()).cloned()),
-                )
-                .unwrap()
-                .and_then(|v| {
-                    v.get("refresh_token").map(|t| Token {
-                        refresh_token: serde_json::from_value::<String>(t.clone()).ok(),
-                        ..Token::default()
-                    })
-                });
-
-                if token.is_some() {
-                    tauri::async_runtime::block_on(async move {
-                        let spotify_client = spotify_client.lock().await;
-                        *spotify_client.token.lock().await.unwrap() = token.clone();
-                        spotify_client
-                            .refresh_token()
-                            .await
-                            .expect("to refresh token.");
-                    });
-                }
-            }
-
             Ok(())
         })
-        .manage(SpotifyClient(Arc::new(Mutex::new(spotify))))
         .manage(EventLoopHandle(SyncMutex::new(None)))
-        .invoke_handler(tauri::generate_handler![login_spotify])
+        .manage(AppStore(Arc::new(Mutex::new(AppState {
+            spotify_client: Arc::new(Mutex::new(spotify)),
+            ..AppState::default()
+        }))))
+        .invoke_handler(tauri::generate_handler![
+            login_spotify,
+            next_track,
+            prev_track,
+            play_pause,
+            toggle_saved,
+            toggle_shuffle
+        ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| {

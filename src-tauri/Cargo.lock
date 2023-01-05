@@ -2985,6 +2985,8 @@ dependencies = [
 name = "spotify-mini-player"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
+ "async-trait",
  "chrono",
  "cocoa",
  "env_logger",
@@ -2997,6 +2999,8 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-positioner",
  "tauri-plugin-store",
+ "thiserror",
+ "tokio",
  "webbrowser",
  "window-vibrancy",
 ]
