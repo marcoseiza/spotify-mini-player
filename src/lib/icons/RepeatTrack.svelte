@@ -1,0 +1,30 @@
+<script lang="ts">
+  let className = "";
+  export { className as class };
+
+  export let size = 17;
+</script>
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 33 33"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  class={className}
+>
+  <path
+    d="M16.5 26H24.3704C26.9272 26 29 23.7614 29 21V12C29 9.23858 26.9272 7 24.3704 7H21M16.5 26L19.5 23M16.5 26L19.5 29M13 26H8.62963C6.07276 26 4 23.7614 4 21V12C4 9.23858 6.07276 7 8.62963 7H12"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M17 13V7C16.5 8 16 8.5 15 9"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

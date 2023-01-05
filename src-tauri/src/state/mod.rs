@@ -1,7 +1,7 @@
 use crate::helpers::to_string;
 
 pub use self::simplified_item::{PlayableId, SimplifiedItem};
-use rspotify::model::{AdditionalType, TrackId};
+use rspotify::model::{AdditionalType, RepeatState, TrackId};
 use rspotify::prelude::OAuthClient;
 use rspotify::{AuthCodeSpotify, ClientError};
 use serde::Serialize;
@@ -24,12 +24,11 @@ pub const STORE_TOKEN_KEY: &str = "access_token";
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct AppState {
-    pub prev: Option<SimplifiedItem>,
     pub curr: Option<SimplifiedItem>,
-    pub next: Option<SimplifiedItem>,
     pub shuffle: bool,
     pub progress_ms: u64,
     pub playing: bool,
+    pub repeat_state: RepeatState,
 
     #[serde(skip_serializing)]
     pub last_playback_call: Instant,
@@ -100,6 +99,7 @@ impl AppState {
             self.playing = context.is_playing;
             self.device_id = context.device.id.clone();
             self.shuffle = context.shuffle_state;
+            self.repeat_state = context.repeat_state;
 
             let mut item = SimplifiedItem::from(context);
 
@@ -122,12 +122,11 @@ impl Default for AppState {
     fn default() -> Self {
         AppState {
             spotify_client: Arc::default(),
-            prev: None,
             curr: None,
-            next: None,
             shuffle: false,
             progress_ms: 0,
             playing: false,
+            repeat_state: RepeatState::Off,
             last_playback_call: Instant::now(),
             last_seek_update: Instant::now(),
             device_id: None,

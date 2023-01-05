@@ -2,6 +2,7 @@
   import NextTrack from "./NextTrack.svelte";
   import PlayPause from "./PlayPause.svelte";
   import PrevTrack from "./PrevTrack.svelte";
+  import Repeat from "./Repeat.svelte";
   import Save from "./Save.svelte";
   import Shuffle from "./Shuffle.svelte";
 </script>
@@ -15,6 +16,7 @@
   <div class="play-controls">
     <Save />
     <Shuffle />
+    <Repeat />
   </div>
 </div>
 
@@ -26,6 +28,7 @@
     flex-direction: column;
     justify-content: center;
     gap: 0.7em;
+    color: var(--icon-color);
   }
 
   .music-controls {
@@ -37,7 +40,7 @@
   }
 
   :global(.music-controls > *:hover) {
-    color: #1db954;
+    color: var(--icon-color-hover);
   }
 
   .play-controls {

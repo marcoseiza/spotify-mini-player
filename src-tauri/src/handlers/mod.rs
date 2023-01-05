@@ -1,3 +1,4 @@
+use rspotify::model::RepeatState;
 use rspotify::{prelude::OAuthClient, AuthCodeSpotify};
 use rspotify::{ClientError, ClientResult};
 use serde::Serialize;
@@ -213,6 +214,42 @@ pub async fn toggle_shuffle(
         app_state.emit_update(&app_handle);
         let result = (*spotify_client)
             .shuffle(app_state.shuffle, app_state.device_id.as_deref())
+            .await;
+
+        if result.is_err() {
+            *app_state = prev_app_state;
+            app_state.emit_update(&app_handle);
+            result?;
+        }
+    }
+
+    app_state.get_current_playback().await?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn cycle_repeat_state(
+    app_handle: tauri::AppHandle,
+    app_store: tauri::State<'_, AppStore>,
+) -> Result<(), HandlerError> {
+    let mut app_state = app_store.0.lock().await;
+
+    {
+        let prev_app_state = app_state.clone();
+        let spotify_client = app_state.spotify_client.clone();
+        let spotify_client = spotify_client.lock().await;
+
+        use RepeatState::*;
+        app_state.repeat_state = match &app_state.repeat_state {
+            Off => Context,
+            Context => Track,
+            Track => Off,
+        };
+        app_state.emit_update(&app_handle);
+
+        let result = (*spotify_client)
+            .repeat(app_state.repeat_state, app_state.device_id.as_deref())
             .await;
 
         if result.is_err() {

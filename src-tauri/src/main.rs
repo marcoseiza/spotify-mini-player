@@ -145,7 +145,8 @@ fn main() {
             prev_track,
             play_pause,
             toggle_saved,
-            toggle_shuffle
+            toggle_shuffle,
+            cycle_repeat_state
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

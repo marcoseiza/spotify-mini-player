@@ -12,14 +12,16 @@
 
 <style>
   .shuffle {
-    color: white;
+    color: var(--icon-color);
     display: flex;
   }
   .shuffle:hover {
-    color: var(--spotify-green);
+    color: var(--icon-color-hover);
   }
-
   .shuffle.shuffle-on {
     color: var(--spotify-green);
+  }
+  .shuffle.shuffle-on:hover {
+    color: var(--spotify-green-hover);
   }
 </style>

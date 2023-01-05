@@ -14,13 +14,16 @@
 
 <style>
   .heart {
-    color: white;
+    color: var(--icon-color);
     display: flex;
   }
   .heart:hover {
-    color: var(--spotify-green);
+    color: var(--icon-color-hover);
   }
   .heart.saved {
     color: var(--spotify-green);
+  }
+  .heart.saved:hover {
+    color: var(--spotify-green-hover);
   }
 </style>

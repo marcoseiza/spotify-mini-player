@@ -23,6 +23,9 @@
   overflow: hidden;
 
   --spotify-green: #1db954;
+  --spotify-green-hover: #22dd64;
+  --icon-color: #c2c2c2;
+  --icon-color-hover: white;
 }
 
 @media (prefers-color-scheme: light) {

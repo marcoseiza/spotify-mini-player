@@ -3,20 +3,25 @@ import { writable, type Readable, get, type Subscriber } from "svelte/store";
 import type { SimplifiedItem } from "./simplified-item";
 import { invoke } from "@tauri-apps/api";
 
+const REPEAT_STATE = {
+  OFF: "off",
+  TRACK: "track",
+  CONTEXT: "context",
+} as const;
+export type RepeatState = typeof REPEAT_STATE[keyof typeof REPEAT_STATE];
+
 interface AppState {
-  prev: SimplifiedItem | undefined;
   curr: SimplifiedItem | undefined;
-  next: SimplifiedItem | undefined;
   playing: boolean;
+  repeatState: RepeatState;
   progressMs: number;
   shuffle: boolean;
 }
 
 const defaultAppStore: AppState = {
-  prev: undefined,
   curr: undefined,
-  next: undefined,
   playing: false,
+  repeatState: "off",
   progressMs: 0,
   shuffle: false,
 };
@@ -77,6 +82,9 @@ export const appStore = (() => {
     },
     toggleShuffle: async () => {
       await invoke("toggle_shuffle");
+    },
+    cycleRepeatState: async () => {
+      await invoke("cycle_repeat_state");
     },
   };
 })();
